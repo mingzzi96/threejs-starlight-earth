@@ -9,6 +9,17 @@ export default function () {
   });
   renderer.outputEncoding = THREE.sRGBEncoding;
   const textureLoader = new THREE.TextureLoader();
+  const cubeTextureLoader = new THREE.CubeTextureLoader();
+  const environmentMap = cubeTextureLoader.load([
+    "./assets/environments/px.png",
+    "./assets/environments/nx.png",
+    "./assets/environments/py.png",
+    "./assets/environments/ny.png",
+    "./assets/environments/pz.png",
+    "./assets/environments/nz.png",
+  ]);
+
+  environmentMap.encoding = THREE.sRGBEncoding;
 
   const container = document.querySelector("#container");
 
@@ -20,6 +31,8 @@ export default function () {
   };
 
   const scene = new THREE.Scene();
+  scene.background = environmentMap;
+  scene.environment = environmentMap;
   const camera = new THREE.PerspectiveCamera(
     75,
     canvasSize.width / canvasSize.height,
@@ -41,13 +54,38 @@ export default function () {
   const createEarth1 = () => {
     const material = new THREE.MeshStandardMaterial({
       // color: 0x1234ff,
-      map: textureLoader.load("./earth_nightmap.jpg"),
+      map: textureLoader.load("./assets/images/earth_nightmap.jpg"),
+      side: THREE.FrontSide,
+      opacity: 0.6,
+      transparent: true,
     });
-    const geometry = new THREE.SphereGeometry(1.3, 30, 30);
+    const geometry = new THREE.SphereGeometry(1, 30, 30);
 
     const mesh = new THREE.Mesh(geometry, material);
 
-    scene.add(mesh);
+    return mesh;
+  };
+
+  const createEarth2 = () => {
+    const material = new THREE.MeshStandardMaterial({
+      // color: 0x1234ff,
+      map: textureLoader.load("./assets/images/earth_nightmap.jpg"),
+      opacity: 0.9,
+      transparent: true,
+      side: THREE.BackSide,
+    });
+    const geometry = new THREE.SphereGeometry(1.2, 30, 30);
+
+    const mesh = new THREE.Mesh(geometry, material);
+
+    return mesh;
+  };
+
+  const create = () => {
+    const earth1 = createEarth1();
+    const earth2 = createEarth2();
+
+    scene.add(earth1, earth2);
   };
 
   const resize = () => {
@@ -75,7 +113,7 @@ export default function () {
 
   const initialize = () => {
     addLight();
-    createEarth1();
+    create();
     addEvent();
     resize();
     draw();
