@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { convertLatLngToPos } from "./utils";
+import { convertLatLngToPos, getGradientCanvas } from "./utils";
 import vertexShader from "../shaders/vertex.glsl?raw";
 import fragmentShader from "../shaders/fragment.glsl?raw";
 
@@ -112,24 +112,67 @@ export default function () {
     return star;
   };
 
-  const createPoint = () => {
+  const createPoint1 = () => {
+    // 서울
     const point = {
       lat: 37.56668 * (Math.PI / 180),
       lng: 126.97841 * (Math.PI / 180),
     };
 
-    console.log(point);
-
     const position = convertLatLngToPos(point, 1.3);
 
-    console.log(position);
-
     const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.03, 20, 20),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 })
+      new THREE.TorusGeometry(0.02, 0.002, 20, 20),
+      new THREE.MeshBasicMaterial({ color: 0x263d64 })
     );
 
     mesh.position.set(position.x, position.y, position.z);
+    mesh.rotation.set(0.9, 2.46, 1);
+
+    return mesh;
+  };
+
+  const createPoint2 = () => {
+    // 가나
+    const point = {
+      lat: 5.55363 * (Math.PI / 180),
+      lng: -0.196481 * (Math.PI / 180),
+    };
+
+    const position = convertLatLngToPos(point, 1.3);
+
+    const mesh = new THREE.Mesh(
+      new THREE.TorusGeometry(0.02, 0.002, 20, 20),
+      new THREE.MeshBasicMaterial({ color: 0x263d64 })
+    );
+
+    mesh.position.set(position.x, position.y, position.z);
+
+    return mesh;
+  };
+
+  const createCurve = (pos1, pos2) => {
+    const points = [];
+
+    for (let i = 0; i <= 100; i++) {
+      const pos = new THREE.Vector3().lerpVectors(pos1, pos2, i / 100);
+      pos.normalize();
+
+      const wave = Math.sin((Math.PI * i) / 100);
+
+      pos.multiplyScalar(1.3 + 0.4 * wave); // 지구의 반지름 만큼 넓혀줘야함
+
+      points.push(pos);
+    }
+
+    const curve = new THREE.CatmullRomCurve3(points);
+    const geometry = new THREE.TubeGeometry(curve, 20, 0.003);
+
+    const gradientCanvas = getGradientCanvas("#757F94", "#263D74");
+    const texture = new THREE.CanvasTexture(gradientCanvas);
+
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const mesh = new THREE.Mesh(geometry, material);
 
     return mesh;
   };
@@ -138,9 +181,11 @@ export default function () {
     const earth1 = createEarth1();
     const earth2 = createEarth2();
     const star = createStar();
-    const point = createPoint();
+    const point1 = createPoint1();
+    const point2 = createPoint2();
+    const curve = createCurve(point1.position, point2.position);
 
-    scene.add(earth1, earth2, star, point);
+    scene.add(earth1, earth2, star, point1, point2, curve);
 
     return {
       earth1,
