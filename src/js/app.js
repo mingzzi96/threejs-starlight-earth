@@ -178,6 +178,8 @@ export default function () {
   };
 
   const create = () => {
+    const earthGroup = new THREE.Group();
+
     const earth1 = createEarth1();
     const earth2 = createEarth2();
     const star = createStar();
@@ -185,11 +187,12 @@ export default function () {
     const point2 = createPoint2();
     const curve = createCurve(point1.position, point2.position);
 
-    scene.add(earth1, earth2, star, point1, point2, curve);
+    earthGroup.add(earth1, earth2, point1, point2, curve);
+
+    scene.add(earthGroup);
 
     return {
-      earth1,
-      earth2,
+      earthGroup,
       star,
     };
   };
@@ -210,15 +213,15 @@ export default function () {
   };
 
   const draw = (obj) => {
-    const { earth1, earth2, star } = obj;
-    // earth1.rotation.x += 0.0005;
-    // earth1.rotation.y += 0.0005;
+    const { earthGroup, star } = obj;
+    earthGroup.rotation.x += 0.0005;
+    earthGroup.rotation.y += 0.0005;
 
-    // earth2.rotation.x += 0.0005;
-    // earth2.rotation.y += 0.0005;
+    earthGroup.rotation.x += 0.0005;
+    earthGroup.rotation.y += 0.0005;
 
-    // star.rotation.x += 0.001;
-    // star.rotation.y += 0.001;
+    star.rotation.x += 0.001;
+    star.rotation.y += 0.001;
 
     controls.update();
     renderer.render(scene, camera);
