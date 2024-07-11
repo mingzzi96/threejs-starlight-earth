@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { convertLatLngToPos } from "./utils";
 import vertexShader from "../shaders/vertex.glsl?raw";
 import fragmentShader from "../shaders/fragment.glsl?raw";
 
@@ -59,9 +60,10 @@ export default function () {
       opacity: 0.6,
       transparent: true,
     });
-    const geometry = new THREE.SphereGeometry(1, 30, 30);
+    const geometry = new THREE.SphereGeometry(1.3, 30, 30);
 
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.y = -Math.PI / 2;
 
     return mesh;
   };
@@ -74,9 +76,10 @@ export default function () {
       transparent: true,
       side: THREE.BackSide,
     });
-    const geometry = new THREE.SphereGeometry(1.2, 30, 30);
+    const geometry = new THREE.SphereGeometry(1.5, 30, 30);
 
     const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.y = -Math.PI / 2;
 
     return mesh;
   };
@@ -109,12 +112,35 @@ export default function () {
     return star;
   };
 
+  const createPoint = () => {
+    const point = {
+      lat: 37.56668 * (Math.PI / 180),
+      lng: 126.97841 * (Math.PI / 180),
+    };
+
+    console.log(point);
+
+    const position = convertLatLngToPos(point, 1.3);
+
+    console.log(position);
+
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(0.03, 20, 20),
+      new THREE.MeshBasicMaterial({ color: 0xff0000 })
+    );
+
+    mesh.position.set(position.x, position.y, position.z);
+
+    return mesh;
+  };
+
   const create = () => {
     const earth1 = createEarth1();
     const earth2 = createEarth2();
     const star = createStar();
+    const point = createPoint();
 
-    scene.add(earth1, earth2, star);
+    scene.add(earth1, earth2, star, point);
 
     return {
       earth1,
@@ -140,14 +166,14 @@ export default function () {
 
   const draw = (obj) => {
     const { earth1, earth2, star } = obj;
-    earth1.rotation.x += 0.0005;
-    earth1.rotation.y += 0.0005;
+    // earth1.rotation.x += 0.0005;
+    // earth1.rotation.y += 0.0005;
 
-    earth2.rotation.x += 0.0005;
-    earth2.rotation.y += 0.0005;
+    // earth2.rotation.x += 0.0005;
+    // earth2.rotation.y += 0.0005;
 
-    star.rotation.x += 0.001;
-    star.rotation.y += 0.001;
+    // star.rotation.x += 0.001;
+    // star.rotation.y += 0.001;
 
     controls.update();
     renderer.render(scene, camera);
